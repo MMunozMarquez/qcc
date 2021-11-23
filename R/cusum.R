@@ -12,7 +12,7 @@ cusum <- function(data,
 {
   call <- match.call()
   if (missing(data))
-     stop("'data' argument is not specified")
+     stop(gettext("'data' argument is not specified"))
 
   data.name <- deparse(substitute(data))
   data <- data.matrix(data)
@@ -23,31 +23,31 @@ cusum <- function(data,
     { if(length(sizes)==1)
          sizes <- rep(sizes, nrow(data))
       else if(length(sizes) != nrow(data))
-              stop("sizes length doesn't match with data") }
+              stop(gettext("sizes length doesn't match with data")) }
 
   if (decision.interval <= 0)
-      stop("decision.interval must be positive")
+      stop(gettext("decision.interval must be positive"))
 
   if (head.start < 0 || head.start >= decision.interval)
-      stop("head.start must be non-negative and less than decision.interval")
+      stop(gettext("head.start must be non-negative and less than decision.interval"))
   
   # used for computing statistics and std.dev
   type <- if(any(sizes==1)) "xbar.one" else "xbar"
   if(ncol(data) == 1 & any(sizes > 1) & missing(std.dev))
-     stop("sizes larger than 1 but data appears to be single samples. In this case you must provide also the std.dev")
+     stop(gettext("sizes larger than 1 but data appears to be single samples. In this case you must provide also the std.dev"))
   
   labels <- if(is.null(rownames(data))) 1:nrow(data) else rownames(data)
 
   stats <- paste("stats.", type, sep = "")
   if(!exists(stats, mode="function"))
-     stop(paste("function", stats, "is not defined"))
+     stop(paste(gettext("function"), stats, gettext("is not defined")))
   stats <- do.call(stats, list(data, sizes))
   statistics <- stats$statistics
   if(missing(center)) center <- stats$center
 
   sd <- paste("sd.", type, sep = "")
   if(!exists(sd, mode="function"))
-     stop(paste("function", sd, "is not defined!"))
+     stop(paste(gettext("function"), sd, gettext("is not defined!")))
   if(missing(std.dev)) 
     { std.dev <- switch(type, 
                         "xbar" = { if(any(sizes > 25)) "RMSDF"
@@ -59,7 +59,7 @@ cusum <- function(data,
           { std.dev <- do.call(sd, list(data, sizes, std.dev)) }
        else
           { if (!is.numeric(std.dev))
-               stop("if provided the argument 'std.dev' must be a method available or a numerical value. See help(qcc).")  }
+               stop(gettext("if provided the argument 'std.dev' must be a method available or a numerical value. See help(qcc)."))  }
      }
 
   stopifnot(length(labels) == length(statistics))
@@ -84,11 +84,11 @@ cusum <- function(data,
         newsizes <- rep(newsizes, nrow(newdata))
       else 
         if(length(newsizes) != nrow(newdata))
-          stop("newsizes length doesn't match with newdata") 
+          stop(gettext("newsizes length doesn't match with newdata"))
     }
     stats <- paste("stats.", type, sep = "")
     if(!exists(stats, mode="function"))
-      stop(paste("function", stats, "is not defined"))
+      stop(paste(gettext("function"), stats, gettext("is not defined")))
     newstats <- do.call(stats, list(newdata, newsizes))$statistics
     if(is.null(rownames(newdata)))
     { 
@@ -154,18 +154,18 @@ print.cusum.qcc <- function(x, digits =  getOption("digits"), ...)
   # cat("\nSummary of group statistics:\n")
   # print(summary(statistics), ...)
   
-  cat("Data (phase I)             =", data.name, "\n")
-  cat("Number of groups           =", length(statistics), "\n")
+  cat(gettext("Data (phase I)             ="), data.name, "\n")
+  cat(gettext("Number of groups           ="), length(statistics), "\n")
   
   sizes <- object$sizes
   if(length(unique(sizes))==1)
      sizes <- sizes[1]
   if(length(sizes) == 1)
   {
-    cat("Group sample size          =", signif(sizes), "\n")
+    cat(gettext("Group sample size          ="), signif(sizes), "\n")
   } else 
   {
-    cat("Group sample sizes         =")
+    cat(gettext("Group sample sizes         ="))
     tab <- table(sizes)
     print(matrix(c(as.numeric(names(tab)), tab), 
                  ncol = length(tab), byrow = TRUE, 
@@ -175,10 +175,10 @@ print.cusum.qcc <- function(x, digits =  getOption("digits"), ...)
   }
 
   center <- object$center
-  cat("Center of group statistics =", signif(center, digits = digits), "\n")
+  cat(gettext("Center of group statistics ="), signif(center, digits = digits), "\n")
 
   sd <- object$std.dev
-  cat("Standard deviation         =", signif(sd, digits = digits), "\n")
+  cat(gettext("Standard deviation         ="), signif(sd, digits = digits), "\n")
 
   newdata.name <- object$newdata.name
   newstats <- object$newstats
@@ -187,17 +187,17 @@ print.cusum.qcc <- function(x, digits =  getOption("digits"), ...)
     # cat(paste("\nSummary of group statistics in ", 
     #           newdata.name, ":\n", sep = ""))
     # print(summary(newstats), digits = digits, ...)
-    cat("\nNew data (phase II)        =", newdata.name, "\n")
-    cat("Number of groups           =", length(newstats), "\n")
+    cat(gettext("\nNew data (phase II)        ="), newdata.name, "\n")
+    cat(gettext("Number of groups           ="), length(newstats), "\n")
     newsizes <- object$newsizes
     if (length(unique(newsizes)) == 1)
       newsizes <- newsizes[1]
     if(length(newsizes) == 1)
     {
-      cat("Group sample size          =", signif(newsizes), "\n")
+      cat(gettext("Group sample size          ="), signif(newsizes), "\n")
     } else 
     { 
-      cat("Group sample sizes         =")
+      cat(gettext("Group sample sizes         ="))
       new.tab <- table(newsizes)
       print(matrix(c(as.numeric(names(new.tab)), new.tab),
                    ncol = length(new.tab), byrow = TRUE, 
@@ -210,12 +210,12 @@ print.cusum.qcc <- function(x, digits =  getOption("digits"), ...)
   cat("\n")
   if(object$head.start > 0)
   {
-    cat("Head start (StdErr)        =",
+    cat(gettext("Head start (StdErr)        ="),
         signif(object$head.start, digits = digits), "\n")
   }
-  cat("Decision interval (StdErr) =", 
+  cat(gettext("Decision interval (StdErr) ="), 
       signif(object$decision.interval, digits = digits), "\n")
-  cat("Shift detection   (StdErr) =", 
+  cat(gettext("Shift detection   (StdErr) ="), 
       signif(object$se.shift, digits = digits), "\n")
 
   invisible()
@@ -234,7 +234,7 @@ plot.cusum.qcc <- function(x, xtime = NULL,
 {
   object <- x  # Argh.  Really want to use 'object' anyway
   if ((missing(object)) | (!inherits(object, "cusum.qcc")))
-     stop("an object of class `cusum.qcc' is required")
+     stop(gettext("an object of class `cusum.qcc' is required"))
 
   # collect info from object
   type <- object$type
@@ -256,11 +256,11 @@ plot.cusum.qcc <- function(x, xtime = NULL,
   if(missing(title))
   { 
     if(is.null(newstats))
-       title <- paste(type, "chart for", data.name)
+       title <- paste(type, gettext("chart for"), data.name)
     else if(chart.all)
-           title <- paste(type, "chart for", data.name, "and", newdata.name)
+           title <- paste(type, gettext("chart for"), data.name, gettext("and"), newdata.name)
          else 
-           title <- paste(type, "Chart for", newdata.name) 
+           title <- paste(type, gettext("Chart for"), newdata.name) 
   }
   
   df <- data.frame(group = groups, 
@@ -296,8 +296,8 @@ plot.cusum.qcc <- function(x, xtime = NULL,
     scale_colour_manual(values = c("black", qcc.options("rules")$col)) +
     scale_shape_manual(values = c(20, qcc.options("rules")$pch)) +
     labs(title = title, subtitle = "",
-         x = if(missing(xlab)) "Group" else xlab,
-         y = if(missing(ylab)) "Cumulative Sum" else ylab) +
+         x = if(missing(xlab)) gettext("Group") else xlab,
+         y = if(missing(ylab)) gettext("Cumulative Sum") else ylab) +
     coord_cartesian(xlim = xlim+c(-0.5,0.5), 
                     ylim = extendrange(ylim),
                     expand = FALSE, clip = "off") +
@@ -318,7 +318,7 @@ plot.cusum.qcc <- function(x, xtime = NULL,
       scale_x_date(breaks = pretty(df$group, n = 7))
   }
     
-  lab <- "Above target"
+  lab <- gettext("Above target")
   if (add.stats && object$head.start > 0)
       lab <- paste(lab, " (start = ", object$head.start, ")", sep = "")
   plot <- plot + 
@@ -326,9 +326,9 @@ plot.cusum.qcc <- function(x, xtime = NULL,
              y = max(extendrange(ylim))/2,
              label = lab, angle = 90,
              hjust = 0.5, vjust = 0.5, size = 10 * 5/14)
-  lab <- "Below target"
+  lab <- gettext("Below target")
   if (add.stats && object$head.start > 0)
-    lab <- paste(lab, " (start = ", - object$head.start, ")", sep = "")
+    lab <- paste(lab, gettext(" (start = "), - object$head.start, ")", sep = "")
   plot <- plot + 
     annotate("text", x = min(xlim)-0.1*diff(range(xlim)),
              y = min(extendrange(ylim))/2,
@@ -374,11 +374,11 @@ plot.cusum.qcc <- function(x, xtime = NULL,
       geom_vline(xintercept = min(xlim) + len.obj.stats + 0.5, lty = 3) +
       annotate("text", x = min(xlim) + len.obj.stats/2, 
                y = max(extendrange(ylim)),
-               label = "Calibration data", 
+               label = gettext("Calibration data"), 
                hjust = 0.5, vjust = -0.5, size = 10 * 5/14) +
       annotate("text", x = min(xlim) + len.obj.stats + len.new.stats/2,
                y = max(extendrange(ylim)),
-               label = "New data", 
+               label = gettext("New data"), 
                hjust = 0.5, vjust = -0.5, size = 10 * 5/14)
   }
   
@@ -391,17 +391,17 @@ plot.cusum.qcc <- function(x, xtime = NULL,
       theme(plot.background = element_rect(fill = qcc.options("bg.margin"),
                                            color = qcc.options("bg.margin")))
 
-    text1 <- paste(paste0("Number of groups = ", length(statistics)),
-                   paste0("Center = ", if(length(center) == 1) 
+    text1 <- paste(paste0(gettext("Number of groups = "), length(statistics)),
+                   paste0(gettext("Center = "), if(length(center) == 1) 
                      signif(center[1], digits) else "variable"),
-                   paste0("StdDev = ", if(length(std.dev) == 1) 
-                     signif(std.dev[1], digits) else "variable"), sep = "\n")
+                   paste0(gettext("StdDev = "), if(length(std.dev) == 1) 
+                     signif(std.dev[1], digits) else gettext("variable")), sep = "\n")
     
-    text2 <- paste(paste0("Decision interval (StdErr) = ", 
+    text2 <- paste(paste0(gettext("Decision interval (StdErr) = "), 
                           signif(object$decision.interval, digits = digits)),
-                   paste0("Shift detection (StdErr) = ", 
+                   paste0(gettext("Shift detection (StdErr) = "), 
                           signif(object$se.shift, digits = digits)),
-                   paste0("Number beyond boundaries = ", 
+                   paste0(gettext("Number beyond boundaries = "), 
                           sum(sapply(violations, sum, na.rm = TRUE))), sep = "\n")
     tab1 <- tab_base + 
       geom_text(aes(x = -Inf, y = Inf), label = text1, 
