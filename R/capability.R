@@ -12,9 +12,9 @@ processCapability <- function(object, spec.limits, target,
 # and plot the histogram
 
   if ((missing(object)) | (!inherits(object, "qcc")))
-     stop("an object of class 'qcc' is required")
+     stop(gettext("an object of class 'qcc' is required"))
   if (!(object$type=="xbar" | object$type=="xbar.one"))
-     stop("Process Capability Analysis only available for charts type \"xbar\" and \"xbar.one\" charts")
+     stop(gettext("Process Capability Analysis only available for charts type \"xbar\" and \"xbar.one\" charts"))
 
   x <- as.vector(object$data)
   x <- x[!is.na(x)]
@@ -24,14 +24,14 @@ processCapability <- function(object, spec.limits, target,
   n <- length(x)
 
   if (missing(spec.limits))
-     stop("specification limits must be provided")
+     stop(gettext("specification limits must be provided"))
   spec.limits <- as.vector(spec.limits)[1:2]
   LSL <- spec.limits[1]
   if(!(is.numeric(LSL) & is.finite(LSL))) LSL <- NA
   USL <- spec.limits[2]
   if(!(is.numeric(USL) & is.finite(USL))) USL <- NA
   if(is.na(LSL) & is.na(USL))
-     stop("invalid specification limits")
+     stop(gettext("invalid specification limits"))
 
   has.target <- (!missing(target))
   if(!has.target) 
@@ -41,21 +41,21 @@ processCapability <- function(object, spec.limits, target,
      
   if (is.na(LSL))
      { if (target > USL)
-           warning("target value larger than one-sided specification limit...") }
+           warning(gettext("target value larger than one-sided specification limit...")) }
   if (is.na(USL))
      { if (target < LSL)
-           warning("target value smaller than one-sided specification limit...") }
+           warning(gettext("target value smaller than one-sided specification limit...")) }
   if (!is.na(LSL) & !is.na(USL))
      { if (target < LSL || target > USL)
-       warning("target value is not within specification limits...") }
+       warning(gettext("target value is not within specification limits...")) }
        
   if (missing(nsigmas))
      if (is.null(object$nsigmas))
-        stop("nsigmas not available in the 'qcc' object. Please provide nsigmas.") 
+        stop(gettext("nsigmas not available in the 'qcc' object. Please provide nsigmas."))
      else  nsigmas <- object$nsigmas
   
   if (confidence.level < 0 | confidence.level > 1)
-     stop("the argument confidence.level must be a value between 0 and 1") 
+     stop(gettext("the argument confidence.level must be a value between 0 and 1") )
 
   # computes process capability indices
   Cp <- (USL - LSL) / (2*nsigmas*std.dev)
@@ -93,21 +93,21 @@ processCapability <- function(object, spec.limits, target,
   tab <- cbind(c(Cp, Cp.l, Cp.u, Cp.k, Cpm),
                rbind(Cp.limits, Cp.l.limits, Cp.u.limits, 
                      Cp.k.limits, Cpm.limits))
-  rownames(tab) <- c("Cp", "Cp_l", "Cp_u", "Cp_k", "Cpm")
-  colnames(tab) <- c("Value", names(Cp.limits))
+  rownames(tab) <- c(gettext("Cp"), gettext("Cp_l"), gettext("Cp_u"), gettext("Cp_k"), gettext("Cpm"))
+  colnames(tab) <- c(gettext("Value"), names(Cp.limits))
 
   out <- list(data = x, data.name = object$data.name,
               center = center, std.dev = std.dev, 
               has.target = has.target, target = target, 
               spec.limits = { sl <- c(LSL, USL)
-                              names(sl) <- c("LSL", "USL")
+                              names(sl) <- c(gettext("LSL"), gettext("USL"))
                               sl },
               indices = tab, 
               exp = { exp <- c(exp.LSL, exp.USL)/100
-                      names(exp) <- c("Exp < LSL", "Exp > USL")
+                      names(exp) <- c(gettext("Exp < LSL"), gettext("Exp > USL"))
                       exp }, 
               obs = { obs <- c(obs.LSL, obs.USL)/100
-                      names(obs) <- c("Obs < LSL", "Obs > USL")
+                      names(obs) <- c(gettext("Obs < LSL"), gettext("Obs > USL"))
                       obs } )
   class(out) <- "processCapability"
   return(out)
@@ -116,40 +116,40 @@ processCapability <- function(object, spec.limits, target,
 print.processCapability <- function(x, digits = getOption("digits"), ...)
 {
   object <- x   # Argh.  Really want to use 'object' anyway
-  cat(cli::rule(left = crayon::bold("Process Capability Analysis"), 
+  cat(cli::rule(left = crayon::bold(gettext("Process Capability Analysis")), 
                 width = min(getOption("width"),50)), "\n\n")
   
-  cat(paste(formatC("Number of obs = ", width=16),
+  cat(paste(formatC(gettext("Number of obs = "), width=16),
             formatC(length(object$data), width=12, flag="-"),
-            formatC("Target = ", width=10),
+            formatC(gettext("Target = "), width=10),
             ifelse(object$has.target, 
                    formatC(object$target, digits=digits, flag="-"), ""),
             "\n", sep=""))
-  cat(paste(formatC("Center        = ", width=16),
+  cat(paste(formatC(gettext("Center        = "), width=16),
             formatC(object$center, digits=digits, width=12, flag="-"),
-            formatC("LSL    = ", width=10),
+            formatC(gettext("LSL    = "), width=10),
             ifelse(is.na(object$spec.limits[1]), "",
                    formatC(object$spec.limits[1], digits=digits, flag="-")),
             "\n", sep=""))
-  cat(paste(formatC("StdDev        = ", width=16),
+  cat(paste(formatC(gettext("StdDev        = "), width=16),
             formatC(object$std.dev, digits=digits, width=12, flag="-"),
-            formatC("USL    = ", width=10),
+            formatC(gettext("USL    = "), width=10),
             ifelse(is.na(object$spec.limits[2]), "",
                    formatC(object$spec.limits[2], digits=digits, flag="-")),
             "\n", sep=""))
             
   indices <- object$indices
-  names(dimnames(indices)) <- c("Capability indices", "")
+  names(dimnames(indices)) <- c(gettext("Capability indices"), "")
   print(indices, digits = 3, na.print="", print.gap=2)
   
   cat("\n")
-  cat(paste("Exp<LSL", ifelse(is.na(object$exp[1]), "\t", 
+  cat(paste(gettext("Exp<LSL"), ifelse(is.na(object$exp[1]), "\t", 
                               paste(signif(object$exp[1], digits=2), "%\t", sep="")), 
-            "Obs<LSL", ifelse(is.na(object$obs[1]), "", 
+            gettext("Obs<LSL"), ifelse(is.na(object$obs[1]), "", 
                               paste(signif(object$obs[1], digits=2), "%\n", sep=""))))
-  cat(paste("Exp>USL", ifelse(is.na(object$exp[2]), "\t", 
+  cat(paste(gettext("Exp>USL"), ifelse(is.na(object$exp[2]), "\t", 
                               paste(signif(object$exp[2], digits=2), "%\t", sep="")),
-            "Obs>USL", ifelse(is.na(object$obs[2]), "", 
+            gettext("Obs>USL"), ifelse(is.na(object$obs[2]), "", 
                               paste(signif(object$obs[2], digits=2), "%\n", sep=""))))
   
   invisible()
@@ -173,7 +173,7 @@ plot.processCapability <- function(x,
 
   object <- x  # Argh.  Really want to use 'object' anyway
    if ((missing(object)) | (!inherits(object, "processCapability")))
-     stop("an object of class `processCapability' is required")
+     stop(gettext("an object of class `processCapability' is required"))
 
   xlim <- range(object$data, object$spec.limits, object$target, na.rm = TRUE)
   xlim <- extendrange(r = xlim, f = 0.1)
@@ -193,11 +193,11 @@ plot.processCapability <- function(x,
   xlim <- extendrange(c(object$data,x))
   
   if(missing(title))
-    title <- "Process capability analysis"
+    title <- gettext("Process capability analysis")
 
   plot <- ggplot() +
     geom_histogram(data = data.frame(data = object$data),
-                   aes_string(x = "data", y = "..density.."),
+                   aes_string(x = gettext("data"), y = gettext("..density..")),
                    bins = breaks,
                    fill = fill, 
                    color = color) +
@@ -219,12 +219,12 @@ plot.processCapability <- function(x,
     annotate("text", 
              x = object$spec.limits[1], 
              y = ylim[2],
-             label = "LSL", 
+             label = gettext("LSL"), 
              hjust = 0.5, vjust = -0.5, size = 10 * 5/14) +
     annotate("text", 
              x = object$spec.limits[2], 
              y = ylim[2],
-             label = "USL", 
+             label = gettext("USL"), 
              hjust = 0.5, vjust = -0.5, size = 10 * 5/14) 
   
   if(object$has.target)
@@ -234,7 +234,7 @@ plot.processCapability <- function(x,
       annotate("text", 
                x = object$target, 
                y = ylim[2],
-               label = "Target", 
+               label = gettext("Target"), 
                hjust = 0.5, vjust = -0.5, size = 10 * 5/14) 
   }
   
@@ -248,38 +248,38 @@ plot.processCapability <- function(x,
       theme(plot.background = element_rect(fill = qcc.options("bg.margin"),
                                            color = qcc.options("bg.margin")))
 
-    text1 <- paste(paste0("Number of obs = ", nobs),
-                   paste0("Center = ", signif(object$center, digits)),
-                   paste0("StdDev = ", signif(object$std.dev, digits)), sep = "\n")
+    text1 <- paste(paste0(gettext("Number of obs = "), nobs),
+                   paste0(gettext("Center = "), signif(object$center, digits)),
+                   paste0(gettext("StdDev = "), signif(object$std.dev, digits)), sep = "\n")
     tab1 <- tab_base + 
       geom_text(aes(x = -Inf, y = Inf), label = text1, 
                 hjust = 0, vjust = 1, size = 10 * 5/14) +
       theme(plot.margin = margin(0.5, 0, 0.5, 2, unit = "lines"))
     
-    text2 <- paste(paste0("Target = ", if(object$has.target) signif(object$target, digits) else ""),
-                   paste0("LSL = ", signif(object$spec.limits[1], digits)),
-                   paste0("USL = ", signif(object$spec.limits[2], digits)), 
+    text2 <- paste(paste0(gettext("Target = "), if(object$has.target) signif(object$target, digits) else ""),
+                   paste0(gettext("LSL = "), signif(object$spec.limits[1], digits)),
+                   paste0(gettext("USL = "), signif(object$spec.limits[2], digits)), 
                    sep = "\n")
     tab2 <- tab_base + 
       geom_text(aes(x = -Inf, y = Inf), label = text2, 
                 hjust = 0, vjust = 1, size = 10 * 5/14) +
       theme(plot.margin = margin(0.5, 0, 0.5, 0.5, unit = "lines"))
     
-    text3 <- paste(paste0("Cp     = ", ifelse(is.na(Cp), "", signif(Cp, 3))),
-                   paste0("Cp_l  = ", ifelse(is.na(Cp_l), "", signif(Cp_l, 3))),
-                   paste0("Cp_u = ", ifelse(is.na(Cp_u), "", signif(Cp_u, 3))),
-                   paste0("Cp_k = ", ifelse(is.na(Cp_k), "", signif(Cp_k, 3))),
-                   paste0("Cpm  = ", ifelse(is.na(Cpm), "", signif(Cpm, 3))),
+    text3 <- paste(paste0(gettext("Cp     = "), ifelse(is.na(Cp), "", signif(Cp, 3))),
+                   paste0(gettext("Cp_l  = "), ifelse(is.na(Cp_l), "", signif(Cp_l, 3))),
+                   paste0(gettext("Cp_u = "), ifelse(is.na(Cp_u), "", signif(Cp_u, 3))),
+                   paste0(gettext("Cp_k = "), ifelse(is.na(Cp_k), "", signif(Cp_k, 3))),
+                   paste0(gettext("Cpm  = "), ifelse(is.na(Cpm), "", signif(Cpm, 3))),
                    sep="\n")
     tab3 <- tab_base + 
       geom_text(aes(x = -Inf, y = Inf), label = text3, 
                 hjust = 0, vjust = 1, size = 10 * 5/14) +
       theme(plot.margin = margin(0.5, 0, 0.5, 0.5, unit = "lines"))
     
-    text4 <- paste(paste0("Exp<LSL ", ifelse(is.na(object$exp[1]), "", paste0(signif(object$exp[1], 2), "%"))),
-                   paste0("Exp>USL ", ifelse(is.na(object$exp[2]), "", paste0(signif(object$exp[2], 2), "%"))),
-                   paste0("Obs<LSL ", ifelse(is.na(object$obs[1]), "", paste0(signif(object$obs[1], 2), "%"))),
-                   paste0("Obs>USL ", ifelse(is.na(object$obs[2]), "", paste0(signif(object$obs[2], 2), "%"))),
+    text4 <- paste(paste0(gettext("Exp<LSL "), ifelse(is.na(object$exp[1]), "", paste0(signif(object$exp[1], 2), "%"))),
+                   paste0(gettext("Exp>USL "), ifelse(is.na(object$exp[2]), "", paste0(signif(object$exp[2], 2), "%"))),
+                   paste0(gettext("Obs<LSL "), ifelse(is.na(object$obs[1]), "", paste0(signif(object$obs[1], 2), "%"))),
+                   paste0(gettext("Obs>USL "), ifelse(is.na(object$obs[2]), "", paste0(signif(object$obs[2], 2), "%"))),
                    sep="\n")
     tab4 <- tab_base + 
       geom_text(aes(x = -Inf, y = Inf), label = text4, 
