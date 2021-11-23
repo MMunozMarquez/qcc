@@ -21,7 +21,7 @@ causeEffectDiagram <- function(cause, effect, title,
   nclo <- nc - ncup
   ncc <- max(sapply(cause, length))
   if(missing(title))
-    title <- "Cause-and-Effect diagram"
+    title <- gettext("Cause-and-Effect diagram")
 
   oldpar <- par(no.readonly = TRUE)
   on.exit(par(oldpar))
