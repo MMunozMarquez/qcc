@@ -8,7 +8,7 @@
 <img src="man/figures/logo.png" align="right" width="100px " alt=""/>
 -->
 
-An [R](https://www.r-project.org/) package for **quality control charting and statistical process control**.
+An [R](https://www.r-project.org/) package for **quality control charting and statistical process control**[^1].
 
 <center>
 <img src="man/figures/qcc_ani.gif" alt="qcc animation" style="width: 70%" />
@@ -24,6 +24,8 @@ The **qcc** package provides quality control tools for statistical process contr
   - Process capability analysis.
   - Pareto chart and cause-and-effect chart.
   - Multivariate control charts.
+
+[^1]: This is a fork of the original repository project to develop an international version of the package ready for translation
 
 ## Installation
 
