@@ -26,42 +26,42 @@ qcc <- function(data,
   call <- match.call()
   
   if (missing(data))
-     stop("'data' argument is not specified")
+     stop(gettext("'data' argument is not specified"))
   
   if(identical(type, eval(formals(qcc)$type)))
     { type <- as.character(type)[1]
-      warning("chart 'type' not specified, assuming \"", type, "\"",
+      warning(gettext("chart 'type' not specified, assuming \""), type, "\"",
               immediate. = TRUE) }
   if(!exists(paste("stats.", type, sep = ""), mode="function") |
      !exists(paste("sd.", type, sep = ""), mode="function") |
      !exists(paste("limits.", type, sep = ""), mode="function"))
-    stop(paste("invalid", type, "control chart. See help(qcc) "))
+    stop(paste(gettext("invalid"), type, gettext("control chart. See help(qcc)")))
 
   data.name <- deparse(substitute(data))
   data <- data.matrix(data)
   if (missing(sizes)) 
      { if (any(type==c("p", "np", "u")))
-          stop(paste("sample 'sizes' must be given for a", type, "Chart"))
+          stop(paste(gettext("sample 'sizes' must be given for a"), type, "Chart"))
        else
           sizes <- apply(data, 1, function(x) sum(!is.na(x)))  }
   else
      { if (length(sizes)==1)
           sizes <- rep(sizes, nrow(data))
        else if (length(sizes) != nrow(data))
-                stop("sizes length doesn't match with data") }
+                stop(gettext("sizes length doesn't match with data")) }
 
   labels <- if(is.null(rownames(data))) 1:nrow(data) else rownames(data)
 
   stats <- paste("stats.", type, sep = "")
   if (!exists(stats, mode="function"))
-     stop(paste("function", stats, "is not defined"))
+     stop(paste(gettext("function"), stats, gettext("is not defined")))
   stats <- do.call(stats, list(data, sizes))
   statistics <- stats$statistics
   if (missing(center)) center <- stats$center
 
   sd <- paste("sd.", type, sep = "")
   if (!exists(sd, mode="function"))
-     stop(paste("function", sd, "is not defined!"))
+     stop(paste(gettext("function"), sd, gettext("is not defined!")))
   missing.std.dev <- missing(std.dev)
   if (missing.std.dev)
      { std.dev <- NULL
@@ -78,7 +78,7 @@ qcc <- function(data,
           { std.dev <- do.call(sd, list(data, sizes, std.dev)) }
        else
           { if (!is.numeric(std.dev))
-               stop("if provided the argument 'std.dev' must be a method available or a numerical value. See help(qcc).")  }
+               stop(gettext("if provided the argument 'std.dev' must be a method available or a numerical value. See help(qcc)."))  }
      }
 
   stopifnot(length(labels) == length(statistics))
@@ -102,7 +102,7 @@ qcc <- function(data,
     if(missing(newsizes))
     { 
       if(any(type==c("p", "np", "u")))
-        stop(paste("sample 'newsizes' must be given for a", type, "Chart"))
+        stop(paste(gettext("sample 'newsizes' must be given for a"), type, "Chart"))
       else
         newsizes <- apply(newdata, 1, function(x) sum(!is.na(x))) 
     } else
@@ -111,11 +111,11 @@ qcc <- function(data,
         newsizes <- rep(newsizes, nrow(newdata))
       else 
         if(length(newsizes) != nrow(newdata))
-         stop("newsizes length doesn't match with newdata") 
+         stop(gettext("newsizes length doesn't match with newdata")) 
     }
     stats <- paste("stats.", type, sep = "")
     if(!exists(stats, mode="function"))
-      stop(paste("function", stats, "is not defined"))
+      stop(paste(gettext("function"), stats, gettext("is not defined")))
     newstats <- do.call(stats, list(newdata, newsizes))$statistics
     if(is.null(rownames(newdata)))
     { 
@@ -149,7 +149,7 @@ qcc <- function(data,
   if (missing(limits))
      { limits <- paste("limits.", type, sep = "")
        if (!exists(limits, mode="function"))
-          stop(paste("function", limits, "is not defined"))
+          stop(paste(gettext("function"), limits, gettext("is not defined")))
        limits <- do.call(limits, list(center = center, 
                                       std.dev = std.dev,
                                       sizes = sizes, 
@@ -158,9 +158,9 @@ qcc <- function(data,
      }
   else 
      { if (!missing.std.dev)
-          warning("'std.dev' is not used when limits is given")
+          warning(gettext("'std.dev' is not used when limits is given"))
        if (!is.numeric(limits))
-          stop("'limits' must be a vector of length 2 or a 2-columns matrix")
+          stop(gettext("'limits' must be a vector of length 2 or a 2-columns matrix"))
        limits <- matrix(limits, ncol = 2)
        dimnames(limits) <- list(rep("",nrow(limits)), c("LCL ", "UCL"))
      }
@@ -176,7 +176,7 @@ print.qcc <- function(x, digits = getOption("digits"), ...)
 {
   object <- x   # Argh.  Really want to use 'object' anyway
   # cat("\nCall:\n",deparse(object$call),"\n\n",sep="")
-  cat(cli::rule(left = crayon::bold("Quality Control Chart"), 
+  cat(cli::rule(left = crayon::bold(gettext("Quality Control Chart")), 
                 width = min(getOption("width"),50)), "\n\n")
 
   data.name <- object$data.name
@@ -210,24 +210,24 @@ print.qcc <- function(x, digits = getOption("digits"), ...)
   center <- object$center
   if(length(center) == 1)
   { 
-    cat("Center of group statistics =", signif(center, digits = digits), "\n")   } else
+    cat(gettext("Center of group statistics ="), signif(center, digits = digits), "\n")   } else
   { 
     out <- paste(signif(center, digits = digits))
     out <- out[which(cumsum(nchar(out)+1) < getOption("width")-40)]      
     out <- paste0(paste(out, collapse = " "), " ...")
-    cat("Center of group statistics = ", out, "\n", sep = "")
+    cat(gettext("Center of group statistics = "), out, "\n", sep = "")
   }
   
   sd <- object$std.dev
   if(length(sd) == 1)
   { 
-    cat("Standard deviation         =", signif(sd, digits = digits), "\n") 
+    cat(gettext("Standard deviation         ="), signif(sd, digits = digits), "\n") 
   } else
   { 
     out <- paste(signif(sd, digits = digits))
     out <- out[which(cumsum(nchar(out)+1) < getOption("width")-40)]
     out <- paste0(paste(out, collapse = " "), " ...")
-    cat("Standard deviation         = ", out, "\n", sep = "")
+    cat(gettext("Standard deviation         = "), out, "\n", sep = "")
   }
 
   newdata.name <- object$newdata.name
@@ -238,16 +238,16 @@ print.qcc <- function(x, digits = getOption("digits"), ...)
     # cat(paste("\nSummary of group statistics in ", 
     #           newdata.name, ":\n", sep = ""))
     # print(summary(newstats), digits = digits, ...)
-    cat("\nNew data (phase II)        =", newdata.name, "\n")
-    cat("Number of groups           =", length(newstats), "\n")
+    cat(gettext("\nNew data (phase II)        ="), newdata.name, "\n")
+    cat(gettext("Number of groups           ="), length(newstats), "\n")
     newsizes <- object$newsizes
     if (length(unique(newsizes)) == 1)
       newsizes <- newsizes[1]
     if (length(newsizes) == 1)
     {
-      cat("Group sample size          =", signif(newsizes), "\n")
+      cat(gettext("Group sample size          ="), signif(newsizes), "\n")
     } else 
-    { cat("Group sample sizes         =")
+    { cat(gettext("Group sample sizes         ="))
       new.tab <- table(newsizes)
       print(matrix(c(as.numeric(names(new.tab)), new.tab),
                    ncol = length(new.tab), byrow = TRUE, 
@@ -262,7 +262,7 @@ print.qcc <- function(x, digits = getOption("digits"), ...)
   if(!is.null(limits)) 
   { 
     # cat("Control limits:\n")
-    cat("\nControl limits at nsigmas  =", object$nsigmas, "\n")    
+    cat(gettext("\nControl limits at nsigmas  ="), object$nsigmas, "\n")    
     # names(dimnames(limits)) <- c("Control limits             =", "")
     .printShortMatrix(limits, digits = digits, ...) 
   }
@@ -285,10 +285,10 @@ plot.qcc <- function(x, xtime = NULL,
 {
   object <- x  # Argh.  Really want to use 'object' anyway
   if ((missing(object)) | (!inherits(object, "qcc")))
-    stop("an object of class `qcc' is required")
+    stop(gettext("an object of class `qcc' is required"))
 
   if(! is.null(xtime) & ! inherits(xtime, c("Date", "POSIXct", "POSIXt")))
-    stop("xtime needs to be of class Date, POSIXct or POSIXt")
+    stop(gettext("xtime needs to be of class Date, POSIXct or POSIXt"))
 
   # collect info from object
   type <- object$type
@@ -309,11 +309,11 @@ plot.qcc <- function(x, xtime = NULL,
   if(missing(title))
   { 
     if(is.null(newstats))
-      title <- paste(type, "chart for", data.name)
+      title <- paste(type, gettext("chart for"), data.name)
     else if(chart.all)
-           title <- paste(type, "chart for", data.name, "and", newdata.name)
+           title <- paste(type, gettext("chart for"), data.name, "and", newdata.name)
          else 
-           title <- paste(type, "chart for", newdata.name) 
+           title <- paste(type, gettext("chart for"), newdata.name) 
   }
   
   df <- data.frame(group = groups, 
@@ -333,14 +333,14 @@ plot.qcc <- function(x, xtime = NULL,
   plot <- 
     ggplot(data = df, aes_string(x = "group", y = "stat")) +
     geom_line() +
-    geom_point(aes_string(colour = "violations", 
-                          shape = "violations"), 
+    geom_point(aes_string(colour = gettext("violations"), 
+                          shape = gettext("violations")), 
                size = 2) +
     scale_colour_manual(values = c("black", qcc.options("rules")$col)) +
     scale_shape_manual(values = c(20, qcc.options("rules")$pch)) +
     labs(title = title, subtitle = "",
-         x = if(missing(xlab)) "Group" else xlab,
-         y = if(missing(ylab)) "Group summary statistics" else ylab) +
+         x = if(missing(xlab)) gettext("Group") else xlab,
+         y = if(missing(ylab)) gettext("Group summary statistics") else ylab) +
     coord_cartesian(xlim = xlim+c(-0.5,0.5), 
                     ylim = extendrange(ylim),
                     expand = FALSE, clip = "off") +
@@ -520,11 +520,11 @@ plot.qcc <- function(x, xtime = NULL,
       geom_vline(xintercept = min(xlim) + len.obj.stats + 0.5, lty = 3) +
       annotate("text", x = min(xlim) + len.obj.stats/2, 
                y = max(extendrange(ylim)),
-               label = "Calibration data", 
+               label = gettext("Calibration data"), 
                hjust = 0.5, vjust = -0.5, size = 10 * 5/14) +
       annotate("text", x = min(xlim) + len.obj.stats + len.new.stats/2,
                y = max(extendrange(ylim)),
-               label = "New data", 
+               label = gettext("New data"), 
                hjust = 0.5, vjust = -0.5, size = 10 * 5/14)
   }
   
@@ -537,19 +537,19 @@ plot.qcc <- function(x, xtime = NULL,
       theme(plot.background = element_rect(fill = qcc.options("bg.margin"),
                                            color = qcc.options("bg.margin")))
 
-    text1 <- paste(paste0("Number of groups = ", length(statistics)),
-                   paste0("Center = ", if(length(center) == 1) 
+    text1 <- paste(paste0(gettext("Number of groups = "), length(statistics)),
+                   paste0(gettext("Center = "), if(length(center) == 1) 
                      signif(center[1], digits) else "variable"),
-                   paste0("StdDev = ", if(length(std.dev) == 1) 
+                   paste0(gettext("StdDev = "), if(length(std.dev) == 1) 
                      signif(std.dev[1], digits) else "variable"), sep = "\n")
     text2 <- paste("",
-                   paste0("LCL = ", if(length(unique(lcl)) == 1) 
+                   paste0(gettext("LCL = "), if(length(unique(lcl)) == 1) 
                      signif(lcl[1], digits) else "variable"),
-                   paste0("UCL = " ,if(length(unique(ucl)) == 1) 
+                   paste0(gettext("UCL = "), if(length(unique(ucl)) == 1) 
                      signif(ucl[1], digits) else "variable"), sep = "\n")
     text3 <- paste("",
-                   paste0("Number beyond limits = ", sum(violations==1, na.rm=TRUE)),
-                   paste0("Number violating runs = ", sum(violations > 1, na.rm=TRUE)), sep = "\n")
+                   paste0(gettext("Number beyond limits = "), sum(violations==1, na.rm=TRUE)),
+                   paste0(gettext("Number violating runs = "), sum(violations > 1, na.rm=TRUE)), sep = "\n")
     
     tab1 <- tab_base + 
       geom_text(aes(x = -Inf, y = Inf), label = text1, 
@@ -600,7 +600,7 @@ sd.xbar <- function(data, sizes, std.dev = c("UWAVE-R", "UWAVE-SD", "MVLUE-R", "
   if(missing(sizes))
     sizes <- apply(data, 1, function(x) sum(!is.na(x)))
   if(any(sizes == 1))
-    stop("group sizes must be larger than one")
+    stop(gettext("group sizes must be larger than one"))
   if(!is.numeric(std.dev))
     std.dev <- match.arg(std.dev, choices = eval(formals(sd.xbar)$std.dev))
   if(is.numeric(std.dev))
@@ -638,7 +638,7 @@ sd.xbar <- function(data, sizes, std.dev = c("UWAVE-R", "UWAVE-SD", "MVLUE-R", "
 limits.xbar <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
 {
   if(is.null(nsigmas) & is.null(conf))
-    stop("Argument 'nsigmas' or 'conf' must be provided. See help.")
+    stop(gettext("Argument 'nsigmas' or 'conf' must be provided. See help."))
   if (length(unique(sizes))==1) sizes <- sizes[1]
   se.stats <- std.dev/sqrt(sizes)
   if(is.null(conf))
@@ -651,7 +651,7 @@ limits.xbar <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
             lcl <- center - nsigmas * se.stats
             ucl <- center + nsigmas * se.stats
           }
-       else stop("invalid 'conf' argument. See help.")
+       else stop(gettext("invalid 'conf' argument. See help."))
      }
   limits <- matrix(c(lcl, ucl), ncol = 2)
   rownames(limits) <- rep("", length = nrow(limits))
@@ -701,7 +701,7 @@ limits.S <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
             lcl <- std.dev * sqrt(qchisq((1 - conf)/2, sizes - 1)/
                                   (sizes - 1))
           }
-          else stop("invalid conf argument. See help.")
+          else stop(gettext("invalid conf argument. See help."))
      }
   limits <- matrix(c(lcl, ucl), ncol = 2)
   rownames(limits) <- rep("", length = nrow(limits))
@@ -736,14 +736,14 @@ sd.R <- function(data, sizes, std.dev = c("UWAVE-R", "MVLUE-R"), ...)
 limits.R <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
 {
   if(is.null(nsigmas) & is.null(conf))
-    stop("Argument 'nsigmas' or 'conf' must be provided. See help.")
+    stop(gettext("Argument 'nsigmas' or 'conf' must be provided. See help."))
   if (length(unique(sizes))==1) sizes <- sizes[1]
   se.R.unscaled <- qcc.options("se.R.unscaled")
   Rtab <- length(se.R.unscaled)
   if (is.null(conf)) 
      { if (any(sizes > Rtab))
-          stop(paste("group size must be less than", 
-                      Rtab + 1, "when giving nsigmas"))
+          stop(paste(gettext("group size must be less than"), 
+                      Rtab + 1, gettext("when giving nsigmas")))
        se.R <- se.R.unscaled[sizes] * std.dev
        lcl <- pmax(0, center - nsigmas * se.R)
        ucl <- center + nsigmas * se.R
@@ -753,7 +753,7 @@ limits.R <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
           { ucl <- qtukey(1 - (1 - conf)/2, sizes, 1e100) * std.dev
             lcl <- qtukey((1 - conf)/2, sizes, 1e100) * std.dev
           }
-       else stop("invalid conf argument. See help.")
+       else stop(gettext("invalid conf argument. See help."))
      }
   limits <- matrix(c(lcl, ucl), ncol = 2)
   rownames(limits) <- rep("", length = nrow(limits))
@@ -797,7 +797,7 @@ sd.xbar.one <- function(data, sizes, std.dev = c("MR", "SD"), r = 2, ...)
 limits.xbar.one <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
 {
   if(is.null(nsigmas) & is.null(conf))
-    stop("Argument 'nsigmas' or 'conf' must be provided. See help.")
+    stop(gettext("Argument 'nsigmas' or 'conf' must be provided. See help."))
   se.stats <- std.dev
   if (is.null(conf)) 
      { lcl <- center - nsigmas * se.stats
@@ -809,7 +809,7 @@ limits.xbar.one <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
             lcl <- center - nsigmas * se.stats
             ucl <- center + nsigmas * se.stats
           }
-       else stop("invalid conf argument. See help.")
+       else stop(gettext("invalid conf argument. See help."))
      }
   limits <- matrix(c(lcl, ucl), ncol = 2)
   rownames(limits) <- rep("", length = nrow(limits))
@@ -871,7 +871,7 @@ sd.np <- function(data, sizes, ...)
 limits.np <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
 { 
   if(is.null(nsigmas) & is.null(conf))
-    stop("Argument 'nsigmas' or 'conf' must be provided. See help.")
+    stop(gettext("Argument 'nsigmas' or 'conf' must be provided. See help."))
   sizes <- as.vector(sizes)
   if (length(unique(sizes)) == 1) sizes <- sizes[1]
   pbar <- mean(center / sizes)
@@ -885,7 +885,7 @@ limits.np <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
           { lcl <- qbinom((1 - conf)/2, sizes, pbar)
             ucl <- qbinom((1 - conf)/2, sizes, pbar, lower.tail = FALSE)
           }
-       else stop("invalid conf argument. See help.")
+       else stop(gettext("invalid conf argument. See help."))
      }
   limits <- matrix(c(lcl, ucl), ncol = 2)
   rownames(limits) <- rep("", length = nrow(limits))
@@ -900,7 +900,7 @@ stats.c <- function(data, sizes)
   data <- as.vector(data)
   sizes <- as.vector(sizes)
   if (length(unique(sizes)) != 1)
-     stop("all sizes must be be equal for a c chart")
+     stop(gettext("all sizes must be be equal for a c chart"))
   statistics <- data
   center <- mean(statistics)
   list(statistics = statistics, center = center)
@@ -916,7 +916,7 @@ sd.c <- function(data, sizes, ...)
 limits.c <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
 {
   if(is.null(nsigmas) & is.null(conf))
-    stop("Argument 'nsigmas' or 'conf' must be provided. See help.")
+    stop(gettext("Argument 'nsigmas' or 'conf' must be provided. See help."))
   if (is.null(conf))
      { lcl <- center - nsigmas * sqrt(center)
        lcl[lcl < 0] <- 0
@@ -927,7 +927,7 @@ limits.c <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
           { ucl <- qpois(1 - (1 - conf)/2, center)
             lcl <- qpois((1 - conf)/2, center)
           }
-       else stop("invalid conf argument. See help.")
+       else stop(gettext("invalid conf argument. See help."))
      }
   limits <- matrix(c(lcl, ucl), ncol = 2)
   rownames(limits) <- rep("", length = nrow(limits))
@@ -957,7 +957,7 @@ sd.u <- function(data, sizes, ...)
 limits.u <- function(center, std.dev, sizes, nsigmas = NULL, conf = NULL)
 {
   if(is.null(nsigmas) & is.null(conf))
-    stop("Argument 'nsigmas' or 'conf' must be provided. See help.")
+    stop(gettext("Argument 'nsigmas' or 'conf' must be provided. See help."))
   sizes <- as.vector(sizes)
   if (length(unique(sizes))==1) sizes <- sizes[1]
   limits.c(center * sizes, std.dev, sizes, nsigmas, conf) / sizes
