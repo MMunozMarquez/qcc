@@ -20,7 +20,7 @@ packageVersion("qcc")),
   # startup message
   msg <- qccStartupMessage()
   if(!interactive())
-    msg[1] <- paste("Package 'qcc' version", packageVersion("qcc"))
+    msg[1] <- paste(gettext("Package 'qcc' version"), packageVersion("qcc"))
   packageStartupMessage(msg)
   invisible()
 }
