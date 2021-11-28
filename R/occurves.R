@@ -9,7 +9,7 @@ ocCurves <- function(object, ...)
 # Compute and draws the operating characteristic curves for a qcc object 
 
   if ((missing(object)) | (!inherits(object, "qcc")))
-     stop("an object of class 'qcc' is required")
+     stop(gettext("an object of class 'qcc' is required"))
 
   size <- unique(object$sizes)
   if (length(size)>1)
@@ -24,7 +24,7 @@ ocCurves <- function(object, ...)
                 u    =,
                 c    = ocCurves.c(object, ...))
   if(is.null(out))
-    stop("Operating characteristic curves not available for this type of chart.")
+    stop(gettext("Operating characteristic curves not available for this type of chart."))
   return(out)
 }
 
@@ -37,11 +37,11 @@ ocCurves.xbar <- function(object,
 # Compute beta and ARL for xbar-chart with nsigmas limits. 
 
   if (!(object$type == "xbar"))
-     stop("not a 'qcc' object of type \"xbar\".")
+     stop(gettext("not a 'qcc' object of type \"xbar\"."))
 
   n <- unique(object$sizes)
   if (length(n) > 1)
-     stop("Operating characteristic curves available only for equal sample sizes!")
+     stop(gettext("Operating characteristic curves available only for equal sample sizes!"))
   size <- sort(unique(c(n, size)))
   if (is.null(nsigmas))
      nsigmas <- qnorm(1 - (1 - object$confidence.level) / 2)
@@ -75,11 +75,11 @@ ocCurves.R <- function(object,
 # a change from sigma to c*sigma on the first sample following the change.
 
   if (!(object$type=="R"))
-     stop("not a `qcc' object of type \"R\".")
+     stop(gettext("not a `qcc' object of type \"R\"."))
 
   n <- unique(object$sizes)
   if (length(n) > 1)
-     stop("Operating characteristic curves available only for equal sample sizes!")
+     stop(gettext("Operating characteristic curves available only for equal sample sizes!"))
   size <- sort(unique(c(n, size)))
 
   if(is.null(nsigmas))
@@ -99,8 +99,8 @@ ocCurves.R <- function(object,
     se.R.unscaled <- qcc.options("se.R.unscaled")
     Rtab <- min(length(exp.R.unscaled), length(se.R.unscaled))
     if (any(size > Rtab))
-      stop(paste("group size must be less than",
-                 Rtab + 1, "when giving nsigmas"))
+      stop(paste(gettext("group size must be less than"),
+                 Rtab + 1, gettext("when giving nsigmas")))
     beta.fun2 <- function(c, n, conf)
     {
       d2 <- exp.R.unscaled[n]
@@ -134,11 +134,11 @@ ocCurves.S <- function(object,
 # a change from sigma to c*sigma on the first sample following the change.
 
   if (!(object$type=="S"))
-     stop("not a `qcc' object of type \"S\".")
+     stop(gettext("not a `qcc' object of type \"S\"."))
 
   n <- unique(object$sizes)
   if (length(n) > 1)
-     stop("Operating characteristic curves available only for equal sample sizes!")
+     stop(gettext("Operating characteristic curves available only for equal sample sizes!"))
   size <- sort(unique(c(n, size)))
 
   if(is.null(nsigmas))
@@ -180,14 +180,14 @@ ocCurves.S <- function(object,
 ocCurves.p <- function(object, ...)
 {
   if (!(object$type=="p" | object$type=="np"))
-     stop("not a `qcc' object of type \"p\" or \"np\".")
+     stop(gettext("not a `qcc' object of type \"p\" or \"np\"."))
 
   size <- unique(object$sizes)
   if (length(size) > 1)
-     stop("Operating characteristic curves available only for equal sample sizes!")
+     stop(gettext("Operating characteristic curves available only for equal sample sizes!"))
 
   if (is.null(object$limits))
-     stop("the `qcc' object does not have control limits!")
+     stop(gettext("the `qcc' object does not have control limits!"))
   limits <- object$limits
   p <- seq(0, 1, length=101)
 
@@ -205,7 +205,7 @@ ocCurves.p <- function(object, ...)
   names(dimnames(beta)) <-  c("fraction nonconforming", "\b")
   ARL <- 1/(1-beta)
   
-  warning("Some computed values for the type II error have been rounded due to the discreteness of the binomial distribution. Thus, some ARL values might be meaningless.")
+  warning(gettext("Some computed values for the type II error have been rounded due to the discreteness of the binomial distribution. Thus, some ARL values might be meaningless."))
   
   out <- list(type = object$type, p = p,
               beta = beta, ARL = ARL) 
@@ -216,14 +216,14 @@ ocCurves.p <- function(object, ...)
 ocCurves.c <- function(object, ...)
 {
   if (!(object$type=="c" | object$type=="u"))
-     stop("not a `qcc' object of type \"c\" or \"u\".")
+     stop(gettext("not a `qcc' object of type \"c\" or \"u\"."))
 
   size <- unique(object$sizes)
   if (length(size) > 1)
-     stop("Operating characteristic curves available only for equal sample size!")
+     stop(gettext("Operating characteristic curves available only for equal sample size!"))
 
   if (is.null(object$limits))
-     stop("the `qcc' object does not have control limits!")
+     stop(gettext("the `qcc' object does not have control limits!"))
   limits <- object$limits
   CL  <- object$center
   std.dev <- object$std.dev
@@ -243,7 +243,7 @@ ocCurves.c <- function(object, ...)
   names(beta) <- sprintf(paste0("%.", max(nchar(sub(".*\\.", "", lambda))), "f"), lambda)
   ARL <- 1/(1-beta)
 
-  warning("Some computed values for the type II error have been rounded due to the discreteness of the Poisson distribution. Thus, some ARL values might be meaningless.")
+  warning(gettext("Some computed values for the type II error have been rounded due to the discreteness of the Poisson distribution. Thus, some ARL values might be meaningless."))
 
   out <- list(type = object$type, lambda = lambda,
               beta = beta, ARL = ARL) 
@@ -256,10 +256,10 @@ print.ocCurves <- function(x, digits =  getOption("digits"), ...)
   object <- x   # Argh.  Really want to use 'object' anyway
   cat(cli::rule(left = crayon::bold("Operating Characteristic Curves"), 
                 width = min(getOption("width"),50)), "\n\n")
-  cat("Chart type                 =", object$type, "\n")
-  cat("Prob. type II error (beta) =\n")
+  cat(gettext("Chart type                 ="), object$type, "\n")
+  cat(gettext("Prob. type II error (beta) =\n"))
   .printShortMatrix(zapsmall(object$beta,digits = 4), head = 3, tail = 2)
-  cat("Average run length (ARL)   =\n")
+  cat(gettext("Average run length (ARL)   =\n"))
   .printShortMatrix(zapsmall(object$ARL,digits = 2), head = 3, tail = 2)
   
   invisible()
@@ -279,14 +279,14 @@ plot.ocCurves <- function(x, what = c("beta", "ARL"),
   what <- match.arg(what, choices = eval(formals(plot.ocCurves)$what), 
                     several.ok = FALSE)
   if(missing(title))
-    title <- paste("OC curves for", object$type, "chart")
+    title <- paste(gettext("OC curves for"), object$type, "chart")
   if(missing(ylab))
-    ylab <- if(what == "beta") "Prob. type II error" else "ARL"
+    ylab <- if(what == "beta") gettext("Prob. type II error") else "ARL"
 
   if(object$type == "xbar")
   {
     if(missing(xlab))
-      xlab <- "Process shift (StdDev)"
+      xlab <- gettext("Process shift (StdDev)")
     if(missing(lty))
       lty <- rep(1,length(object$size))
     if(missing(lwd))
@@ -308,15 +308,15 @@ plot.ocCurves <- function(x, what = c("beta", "ARL"),
       scale_colour_manual(values = col) +
       labs(title = title, 
            x = xlab, y = ylab,
-           linetype = "Sample size:",
-           size = "Sample size:", 
-           colour = "Sample size:") +
+           linetype = gettext("Sample size:"),
+           size = gettext("Sample size:"), 
+           colour = gettext("Sample size:")) +
       scale_x_continuous(breaks = unique(as.integer(object$shift)))
   } else
   if(object$type == "R")
   {
     if(missing(xlab))
-      xlab <- "Process scale multiplier"
+      xlab <- gettext("Process scale multiplier")
     if(missing(col))
       col <- blues.colors(length(object$size))
     if(missing(lty))
@@ -340,15 +340,15 @@ plot.ocCurves <- function(x, what = c("beta", "ARL"),
       scale_colour_manual(values = col) +
       labs(title = title, 
            x = xlab, y = ylab,
-           linetype = "Sample size:",
-           size = "Sample size:", 
-           colour = "Sample size:") +
+           linetype = gettext("Sample size:"),
+           size = gettext("Sample size:"), 
+           colour = gettext("Sample size:")) +
       scale_x_continuous(breaks = unique(as.integer(object$multiplier)))
   } else
   if(object$type == "S")
   {
     if(missing(xlab))
-      xlab <- "Process scale multiplier"
+      xlab <- gettext("Process scale multiplier")
     if(missing(col))
       col <- blues.colors(length(object$size))
     if(missing(lty))
@@ -371,14 +371,14 @@ plot.ocCurves <- function(x, what = c("beta", "ARL"),
       scale_colour_manual(values = col) +
       labs(title = title, 
            x = xlab, y = ylab,
-           linetype = "Sample size:",
-           size = "Sample size:", 
-           colour = "Sample size:") +
+           linetype = gettext("Sample size:"),
+           size = gettext("Sample size:"), 
+           colour = gettext("Sample size:")) +
       scale_x_continuous(breaks = unique(as.integer(object$multiplier)))
   } else
   if(object$type == "p" | object$type == "np")
   {
-    if(missing(xlab)) xlab <- "Fraction nonconforming"
+    if(missing(xlab)) xlab <- gettext("Fraction nonconforming")
     if(missing(lty))  lty <- 1
     if(missing(lwd))  lwd <- 1
     if(missing(col))  col <- blues.colors(1)
@@ -391,7 +391,7 @@ plot.ocCurves <- function(x, what = c("beta", "ARL"),
   } else
   if(object$type == "c" | object$type == "u")
   {
-    if(missing(xlab)) xlab <- "Average nonconforming"
+    if(missing(xlab)) xlab <- gettext("Average nonconforming")
     if(missing(lty))  lty <- 1
     if(missing(lwd))  lwd <- 1
     if(missing(col))  col <- blues.colors(1)
