@@ -47,7 +47,7 @@ plot.paretoChart <- function(x,
                              ...)
 {
   
-  if(missing(title)) title <- paste("Pareto Chart for", x$data.name)
+  if(missing(title)) title <- paste(gettext("Pareto Chart for"), x$data.name)
   if(missing(xlab)) xlab <- ""
   if(missing(ylim)) ylim <- c(0, max(x$tab[,"Cum.Freq."], na.rm = TRUE))
   
