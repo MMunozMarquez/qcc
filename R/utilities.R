@@ -48,10 +48,10 @@ qccOverdispersionTest <- function(x, size,
 {
   type <- match.arg(type, c("poisson", "binomial"))
   if (type=="binomial" & missing(size))
-     stop("binomial data require argument \"size\"")
+     stop(gettext("binomial data require argument \"size\""))
   if (!missing(size))
      if (length(x) != length(size))   
-        stop("arguments \"x\" and \"size\" must be vector of same length")
+        stop(gettext("arguments \"x\" and \"size\" must be vector of same length"))
 
   n <- length(x)
   obs.var <- var(x)
@@ -61,7 +61,7 @@ qccOverdispersionTest <- function(x, size,
   else if (type=="poisson")
           { theor.var <- mean(x) }
        else
-          stop("invalid \"type\" argument. See help.")
+          stop(gettext("invalid \"type\" argument. See help."))
 
   D <- (obs.var * (n-1)) / theor.var
   p.value <- 1-pchisq(D, n-1)
@@ -135,10 +135,10 @@ qcc.options <- function(...)
       switch(mode(arg),
              list = temp <- arg,
              character = return(.qcc.options[[arg]]),
-             stop(paste("invalid argument:", sQuote(arg)))) }
+             stop(paste(gettext("invalid argument:"), sQuote(arg)))) }
   if(length(temp) == 0) return(current)
   name <- names(temp)
-  if(is.null(name)) stop("options must be given by name")
+  if(is.null(name)) stop(gettext("options must be given by name"))
   changed <- current[name]
   current[name] <- temp
   env <- if(sys.parent() == 0) asNamespace("qcc") 
