@@ -19,17 +19,17 @@ mqcc <- function(data, type = c("T2", "T2.single"), center, cov,
   call <- match.call()
   type <- match.arg(type)
   if(missing(data))
-     stop("'data' argument is not specified")
+     stop(gettext("'data' argument is not specified"))
   if(missing(data.name))
      data.name <- deparse(substitute(data))
   if(is.matrix(data))
      data <- as.data.frame(data)
   if(is.data.frame(data) | is.list(data))
        { data <- lapply(data, data.matrix) }
-  else { stop("invalid data type!") }
+  else { stop(gettext("invalid data type!")) }
   m <- unique(sapply(data, nrow))    # num. of samples
   if(length(m) > 1)
-     stop("varying number of samples (rows)")
+     stop(gettext("varying number of samples (rows)"))
   n <- unique(sapply(data, ncol))   # samples sizes
   if(length(n) > 1)
      stop("varying sample size (columns)")
@@ -41,19 +41,19 @@ mqcc <- function(data, type = c("T2", "T2.single"), center, cov,
     { var.names <- paste(data.name, "[", 1:p, "]", sep="") }
   #
   if(confidence.level <= 0 | confidence.level >= 1)
-     stop("confidence.level must be a numeric value in the range (0,1)")
+     stop(paste("confidence.level", gettext("must be a numeric value in the range (0,1)")))
   if(missing(labels))
     { labels <- unique(unlist(sapply(data, rownames)))
       if(is.null(labels)) labels <- 1:m
       if(length(labels) != m)
-         stop("labels must match the length of samples provided") }
+         stop(paste("labels", gettext("must match the length of samples provided"))) }
   #
   if(missing(center)) center <- NULL
   if(missing(cov))    cov <- NULL
   #
   stats <- paste("stats.", type, sep = "")
   if(!exists(stats, mode="function"))
-     stop(paste("function", stats, "is not defined"))
+     stop(paste(gettext("function"), stats, gettext("is not defined")))
   stats <- do.call(stats, list(data, center = center, cov = cov))
   statistics <- stats$statistics
   stopifnot(length(labels) == length(statistics))
@@ -77,12 +77,12 @@ mqcc <- function(data, type = c("T2", "T2.single"), center, cov,
          newdata <- as.data.frame(newdata)
       if(is.data.frame(newdata) | is.list(newdata))
            { newdata <- lapply(newdata, data.matrix) }
-      else { stop("invalid data type!") }
+      else { stop(gettext("invalid data type!")) }
       if(length(newdata) != p)
-         stop("num. of variables for newdata not equal to num. of variables for data")
+         stop(gettext("num. of variables for newdata not equal to num. of variables for data"))
       stats <- paste("stats.", type, sep = "")
       if(!exists(stats, mode="function"))
-         stop(paste("function", stats, "is not defined"))
+         stop(paste(gettext("function"), stats, gettext("is not defined")))
       newstats <- do.call(stats, list(newdata, 
                                       center = object$center, 
                                       cov = object$cov))
@@ -91,7 +91,7 @@ mqcc <- function(data, type = c("T2", "T2.single"), center, cov,
           newlabels <- seq(start+1, start+length(newstats$statistics))
         }
       if(length(newlabels) != length(newstats$statistics))
-        stop("labels must match the length of samples provided") 
+        stop(gettext("labels must match the length of samples provided"))
       object$newdata  <- newdata
       object$newdata.name <- newdata.name
       names(newstats$statistics) <- newlabels
@@ -104,14 +104,14 @@ mqcc <- function(data, type = c("T2", "T2.single"), center, cov,
     { if(limits)
         { limits <- paste("limits.", type, sep = "")
           if(!exists(limits, mode="function"))
-            stop(paste("function", limits, "is not defined"))
+            stop(paste(gettext("function"), limits, gettext("is not defined")))
           limits <- do.call(limits, list(ngroups = m, size = n, nvars = p, 
                                          conf = confidence.level))$control }
       else limits <- NULL                                    
     }
   else 
     { if(!is.numeric(limits))
-         stop("'limits' must be a vector of length 2 or a 2-columns matrix")
+         stop(gettext("'limits' must be a vector of length 2 or a 2-columns matrix"))
       limits <- matrix(limits, ncol = 2)
       dimnames(limits) <- list(rep("",nrow(limits)), c("LCL ", "UCL"))
     }
@@ -121,14 +121,14 @@ mqcc <- function(data, type = c("T2", "T2.single"), center, cov,
     { if(pred.limits)
         { pred.limits <- paste("limits.", type, sep = "")
           if(!exists(pred.limits, mode="function"))
-            stop(paste("function", pred.limits, "is not defined"))
+            stop(paste(gettext("function"), pred.limits, gettext("is not defined")))
           pred.limits <- do.call(pred.limits, list(ngroups = m, size = n, nvars = p, 
                                                    conf = confidence.level))$prediction }
       else pred.limits <- NULL                                    
     }
   else 
     { if(!is.numeric(pred.limits))
-         stop("'pred.limits' must be a vector of length 2 or a 2-columns matrix")
+         stop(gettext("'pred.limits' must be a vector of length 2 or a 2-columns matrix"))
       pred.limits <- matrix(pred.limits, ncol = 2)
       dimnames(pred.limits) <- list(rep("",nrow(pred.limits)), c("LPL ", "UPL"))
     }
@@ -155,7 +155,7 @@ print.mqcc <- function(x, digits = getOption("digits"), ...)
 {
   object <- x  # Argh.  Really want to use 'object' anyway
   # cat("\nCall:\n",deparse(object$call),"\n\n",sep="")
-  cat(cli::rule(left = crayon::bold("Multivariate Quality Control Chart"), 
+  cat(cli::rule(left = crayon::bold(gettext("Multivariate Quality Control Chart")), 
                 width = min(getOption("width"),50)), "\n\n")
 
   data <- object$data
@@ -165,15 +165,15 @@ print.mqcc <- function(x, digits = getOption("digits"), ...)
   data.name <- object$data.name
   type <- object$type
   
-  cat("Chart type                 =", type, "\n")
-  cat("Data (phase I)             =", data.name, "\n")
-  cat("Number of groups           =", m, "\n")
-  cat("Group sample size          =", n, "\n")
-  cat("Center = \n")
+  cat(gettext("Chart type                 ="), type, "\n")
+  cat(gettext("Data (phase I)             ="), data.name, "\n")
+  cat(gettext("Number of groups           ="), m, "\n")
+  cat(gettext("Group sample size          ="), n, "\n")
+  cat(gettext("Center = \n"))
   print(object$center, digits = digits)
-  cat("Covariance matrix = \n")
+  cat(gettext("Covariance matrix = \n"))
   print(object$cov, digits = digits)
-  cat("|S| =", format(det(object$cov), digits = digits), "\n")
+  cat(gettext("|S| ="), format(det(object$cov), digits = digits), "\n")
   
   newdata.name <- object$newdata.name
   newstats <- object$newstats
@@ -184,22 +184,22 @@ print.mqcc <- function(x, digits = getOption("digits"), ...)
     n <- unique(sapply(newdata, ncol))     # samples sizes
     # p <- length(newdata)                   # num. of variables
     cat("\n")
-    cat("New data (phase II)        =", newdata.name, "\n")
-    cat("Number of groups           =", m, "\n")
-    cat("Group sample size          =", n, "\n")
+    cat(gettext("New data (phase II)        ="), newdata.name, "\n")
+    cat(gettext("Number of groups           ="), m, "\n")
+    cat(gettext("Group sample size          ="), n, "\n")
   }
   
   ctrl.limits <- object$limits
   if(!is.null(ctrl.limits)) 
   { 
-    cat("\nControl limits:\n")
+    cat(gettext("\nControl limits:\n"))
     .printShortMatrix(ctrl.limits, digits = digits, ...) 
   }
 
   pred.limits <- object$pred.limits
   if(!is.null(pred.limits)) 
   { 
-    cat("\nPrediction limits:\n")
+    cat(gettext("\nPrediction limits:\n"))
     .printShortMatrix(pred.limits, digits = digits, ...) 
   }
   
@@ -220,7 +220,7 @@ plot.mqcc <- function(x,
 {
   object <- x  # Argh.  Really want to use 'object' anyway
   if((missing(object)) | (!inherits(object, "mqcc")))
-     stop("an object of class `mqcc' is required")
+     stop(gettext("an object of class `mqcc' is required"))
   # collect info from object
   data <- object$data
   m <- unique(sapply(data, nrow))     # num. of samples
@@ -251,10 +251,10 @@ plot.mqcc <- function(x,
   if(missing(title))
   { 
     if(is.null(newstats))
-         title <- paste(type, "chart for", data.name)
+         title <- paste(type, gettext("chart for"), data.name)
        else if(chart.all)
-               title <- paste(type, "chart for", data.name, "and", newdata.name)
-            else title <- paste(type, "chart for", newdata.name) 
+               title <- paste(type, gettext("chart for"), data.name, gettext("and"), newdata.name)
+            else title <- paste(type, gettext("chart for"), newdata.name) 
   }
   if(isFALSE(title) | is.na(title)) title <- ""
   
@@ -273,8 +273,8 @@ plot.mqcc <- function(x,
   plot(indices, statistics, type = "n",
        ylim = if(!missing(ylim)) ylim 
               else range(statistics, limits, pred.limits),
-       ylab = if(missing(ylab)) "Group summary statistics" else ylab,
-       xlab = if(missing(xlab)) "Group" else xlab, 
+       ylab = if(missing(ylab)) gettext("Group summary statistics") else ylab,
+       xlab = if(missing(xlab)) gettext("Group") else xlab, 
        axes = FALSE)
   rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
        col = qcc.options("bg.figure"))
@@ -341,9 +341,9 @@ plot.mqcc <- function(x,
     len.obj.stats <- length(object$statistics)
     len.new.stats <- length(statistics) - len.obj.stats
     abline(v = len.obj.stats + 0.5, lty = 3)
-    mtext("Calibration data", cex = par("cex")*0.8,
+    mtext(gettext("Calibration data"), cex = par("cex")*0.8,
           at = len.obj.stats/2, line = 0, adj = 0.5)
-    mtext("New data", cex = par("cex")*0.8, 
+    mtext(gettext("New data"), cex = par("cex")*0.8, 
           at = len.obj.stats + len.new.stats/2, line = 0, adj = 0.5)
   }
 
@@ -397,7 +397,7 @@ plot.mqcc <- function(x,
             side = 1, outer = TRUE, line = 1*cex.stats, adj = 0, at = at[3],
             font = qcc.options("font.stats"),
             cex = par("cex")*qcc.options("cex.stats"))
-      mtext(paste("Num. beyond limits =",
+      mtext(paste(gettext("Num. beyond limits ="),
                   sum(violations==2, na.rm=TRUE)), 
             side = 1, outer = TRUE, line = 2*cex.stats, adj = 0, at = at[3],
             font = qcc.options("font.stats"),
@@ -414,7 +414,7 @@ ellipseChart <- function(object, chart.all = TRUE, show.id = FALSE, ngrid = 50,
                          restore.par = TRUE, ...) 
 {
   if((missing(object)) | (!inherits(object, "mqcc")))
-     stop("an object of class `mqcc' is required")
+     stop(gettext("an object of class `mqcc' is required"))
 
   data <- object$data
   m <- unique(sapply(data, nrow))     # num. of samples
@@ -460,10 +460,10 @@ ellipseChart <- function(object, chart.all = TRUE, show.id = FALSE, ngrid = 50,
   if(missing(title))
   { 
     if(is.null(object$newstats))
-      title <- paste("Ellipse chart for", object$data.name)
+      title <- paste(gettext("Ellipse chart for"), object$data.name)
     else if(chart.all)
-      title <- paste("Ellipse chart for", object$data.name, "and", object$newdata.name)
-    else title <- paste("Ellipse chart for", object$newdata.name) 
+      title <- paste(gettext("Ellipse chart for"), object$data.name, "and", object$newdata.name)
+    else title <- paste(gettext("Ellipse chart for"), object$newdata.name) 
   }
   if(isFALSE(title) | is.na(title)) title <- ""
   #
