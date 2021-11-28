@@ -22,8 +22,8 @@ describe <- function(data, by, detailed = FALSE, ...)
       by <- as.factor(by)
     } else
     {
-      stop(by_name, "not available in data.frame", data_name, 
-           "or object not found")
+      stop(by_name, gettext("not available in data.frame"), data_name, 
+           gettext("or object not found"))
     }
     #
     x <- split(data[setdiff(vars_name, by_name)], by)
