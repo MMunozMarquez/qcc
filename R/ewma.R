@@ -20,9 +20,9 @@ ewmaSmooth <- function(x, y, lambda = 0.20, start, ...)
 # y = smoothed fitted values of y
 # 
   if (length(y)!=length(x))
-     stop("x and y must have the same length!")
+     stop(gettext("x and y must have the same length!"))
   if (abs(lambda)>1)
-     stop("lambda parameter must be between 0 and 1")
+     stop(gettext("lambda parameter must be between 0 and 1"))
   ord <- order(x) 
   x <- x[ord]
   y <- y[ord]
@@ -43,7 +43,7 @@ ewma <- function(data,
 
   call <- match.call()
   if (missing(data))
-     stop("'data' argument is not specified")
+     stop(gettext("'data' argument is not specified"))
 
   data.name <- deparse(substitute(data))
   data <- data.matrix(data)
@@ -54,7 +54,7 @@ ewma <- function(data,
     { if(length(sizes)==1)
          sizes <- rep(sizes, nrow(data))
       else if(length(sizes) != nrow(data))
-              stop("sizes length doesn't match with data") }
+              stop(gettext("sizes length doesn't match with data")) }
   # used for computing statistics and std.dev
   type <- if(any(sizes==1)) "xbar.one" else "xbar"
 
@@ -62,14 +62,14 @@ ewma <- function(data,
 
   stats <- paste("stats.", type, sep = "")
   if(!exists(stats, mode="function"))
-     stop(paste("function", stats, "is not defined"))
+     stop(paste(gettext("function"), stats, gettext("is not defined")))
   stats <- do.call(stats, list(data, sizes))
   statistics <- stats$statistics
   if(missing(center)) center <- stats$center
 
   sd <- paste("sd.", type, sep = "")
   if(!exists(sd, mode="function"))
-     stop(paste("function", sd, "is not defined!"))
+     stop(paste(gettext("function"), sd, gettext("is not defined!")))
   if(missing(std.dev)) 
     { std.dev <- switch(type, 
                         "xbar" = { if(any(sizes > 25)) "RMSDF"
@@ -81,7 +81,7 @@ ewma <- function(data,
           { std.dev <- do.call(sd, list(data, sizes, std.dev)) }
        else
           { if (!is.numeric(std.dev))
-               stop("if provided the argument 'std.dev' must be a method available or a numerical value. See help(qcc).")  }
+               stop(gettext("if provided the argument 'std.dev' must be a method available or a numerical value. See help(qcc)."))  }
      }
 
   stopifnot(length(labels) == length(statistics))
@@ -106,11 +106,11 @@ ewma <- function(data,
         newsizes <- rep(newsizes, nrow(newdata))
       else 
         if(length(newsizes) != nrow(newdata))
-           stop("newsizes length doesn't match with newdata") 
+           stop(gettext("newsizes length doesn't match with newdata") )
     }
     stats <- paste("stats.", type, sep = "")
     if(!exists(stats, mode="function"))
-      stop(paste("function", stats, "is not defined"))
+      stop(paste(gettext("function"), stats, gettext("is not defined")))
     newstats <- do.call(stats, list(newdata, newsizes))$statistics
     if(is.null(rownames(newdata)))
     { 
@@ -159,7 +159,7 @@ print.ewma.qcc <- function(x, digits =  getOption("digits"), ...)
 {
   object <- x   # Argh.  Really want to use 'object' anyway
   # cat("\nCall:\n",deparse(object$call),"\n\n",sep="")
-  cat(cli::rule(left = crayon::bold("EWMA Chart"), 
+  cat(cli::rule(left = crayon::bold(gettext("EWMA Chart")), 
                 width = min(getOption("width"),50)), "\n\n")
     
   data.name <- object$data.name
@@ -168,18 +168,18 @@ print.ewma.qcc <- function(x, digits =  getOption("digits"), ...)
   # cat("\nSummary of group statistics:\n")
   # print(summary(statistics), digits = digits, ...)
 
-  cat("Data (phase I)             =", data.name, "\n")
-  cat("Number of groups           =", length(statistics), "\n")
+  cat(gettext("Data (phase I)             ="), data.name, "\n")
+  cat(gettext("Number of groups           ="), length(statistics), "\n")
 
   sizes <- object$sizes
   if(length(unique(sizes))==1)
      sizes <- sizes[1]
   if(length(sizes) == 1)
   {
-    cat("Group sample size          =", signif(sizes), "\n")
+    cat(gettext("Group sample size          ="), signif(sizes), "\n")
   } else 
   {
-    cat("Group sample sizes         =")
+    cat(gettext("Group sample sizes         ="))
     tab <- table(sizes)
     print(matrix(c(as.numeric(names(tab)), tab), 
                  ncol = length(tab), byrow = TRUE, 
@@ -189,10 +189,10 @@ print.ewma.qcc <- function(x, digits =  getOption("digits"), ...)
   }
 
   center <- object$center
-  cat("Center of group statistics =", signif(center, digits = digits), "\n")
+  cat(gettext("Center of group statistics ="), signif(center, digits = digits), "\n")
 
   sd <- object$std.dev
-  cat("Standard deviation         =", signif(sd, digits = digits), "\n")
+  cat(gettext("Standard deviation         ="), signif(sd, digits = digits), "\n")
 
   newdata.name <- object$newdata.name
   newstats <- object$newstats
@@ -201,17 +201,17 @@ print.ewma.qcc <- function(x, digits =  getOption("digits"), ...)
     # cat(paste("\nSummary of group statistics in ", 
     #           newdata.name, ":\n", sep = ""))
     # print(summary(newstats), digits = digits, ...)
-    cat("\nNew data (phase II)        =", newdata.name, "\n")
-    cat("Number of groups           =", length(newstats), "\n")
+    cat(gettext("\nNew data (phase II)        ="), newdata.name, "\n")
+    cat(gettext("Number of groups           ="), length(newstats), "\n")
     newsizes <- object$newsizes
     if (length(unique(newsizes)) == 1)
       newsizes <- newsizes[1]
     if(length(newsizes) == 1)
     {
-      cat("Group sample size          =", signif(newsizes), "\n")
+      cat(gettext("Group sample size          ="), signif(newsizes), "\n")
     } else 
     { 
-      cat("Group sample sizes         =")
+      cat(gettext("Group sample sizes         ="))
       new.tab <- table(newsizes)
       print(matrix(c(as.numeric(names(new.tab)), new.tab),
                    ncol = length(new.tab), byrow = TRUE, 
@@ -221,13 +221,13 @@ print.ewma.qcc <- function(x, digits =  getOption("digits"), ...)
     }
   }
 
-  cat("\nSmoothing parameter        =", 
+  cat(gettext("\nSmoothing parameter        ="), 
       signif(object$lambda, digits = digits), "\n")
 
   limits <- object$limits
   if(!is.null(limits)) 
   { 
-    cat("Control limits at nsigmas  =", object$nsigmas, "\n")    
+    cat(gettext("Control limits at nsigmas  ="), object$nsigmas, "\n")    
     # names(dimnames(limits)) <- c("Control limits             =", "")
     .printShortMatrix(limits, digits = digits, ...) 
   }
@@ -250,7 +250,7 @@ plot.ewma.qcc <- function(x, xtime = NULL,
 {
   object <- x  # Argh.  Really want to use 'object' anyway
   if ((missing(object)) | (!inherits(object, "ewma.qcc")))
-     stop("an object of class `ewma.qcc' is required")
+     stop(gettext("an object of class `ewma.qcc' is required"))
 
   # collect info from object
   type <- object$type
@@ -270,11 +270,11 @@ plot.ewma.qcc <- function(x, xtime = NULL,
   if(missing(title))
   { 
     if(is.null(newstats))
-       title <- paste(type, "chart for", data.name)
+       title <- paste(type, gettext("chart for"), data.name)
     else if(chart.all)
-           title <- paste(type, "chart for", data.name, "and", newdata.name)
+           title <- paste(type, gettext("chart for"), data.name, gettext("and"), newdata.name)
          else 
-           title <- paste(type, "Chart for", newdata.name) 
+           title <- paste(type, gettext("Chart for"), newdata.name) 
   }
 
   df <- data.frame(group = groups, 
@@ -295,15 +295,15 @@ plot.ewma.qcc <- function(x, xtime = NULL,
   plot <- 
     ggplot(data = df, aes_string(x = "group", y = "ewma")) +
     geom_line() +
-    geom_point(aes_string(colour = "violations", 
-                          shape = "violations"), 
+    geom_point(aes_string(colour = gettext("violations"), 
+                          shape = gettext("violations")), 
                size = 2) +
     scale_colour_manual(values = c("black", qcc.options("rules")$col)) +
     scale_shape_manual(values = c(20, qcc.options("rules")$pch)) +
     geom_point(aes_string(y = "stat"), pch = 3) +
     labs(title = title, subtitle = "",
-         x = if(missing(xlab)) "Group" else xlab,
-         y = if(missing(ylab)) "Group Summary Statistics" else ylab) +
+         x = if(missing(xlab)) gettext("Group") else xlab,
+         y = if(missing(ylab)) gettext("Group Summary Statistics") else ylab) +
     coord_cartesian(xlim = xlim+c(-0.5,0.5), 
                     ylim = extendrange(ylim),
                     expand = FALSE, clip = "off") +
@@ -378,11 +378,11 @@ plot.ewma.qcc <- function(x, xtime = NULL,
       geom_vline(xintercept = min(xlim) + len.obj.stats + 0.5, lty = 3) +
       annotate("text", x = min(xlim) + len.obj.stats/2, 
                y = max(extendrange(ylim)),
-               label = "Calibration data", 
+               label = gettext("Calibration data"), 
                hjust = 0.5, vjust = -0.5, size = 10 * 5/14) +
       annotate("text", x = min(xlim) + len.obj.stats + len.new.stats/2,
                y = max(extendrange(ylim)),
-               label = "New data", 
+               label = gettext("New data"), 
                hjust = 0.5, vjust = -0.5, size = 10 * 5/14)
   }
   
@@ -395,16 +395,16 @@ plot.ewma.qcc <- function(x, xtime = NULL,
       theme(plot.background = element_rect(fill = qcc.options("bg.margin"),
                                            color = qcc.options("bg.margin")))
 
-    text1 <- paste(paste0("Number of groups = ", length(statistics)),
-                   paste0("Center = ", if(length(center) == 1) 
+    text1 <- paste(paste0(gettext("Number of groups = "), length(statistics)),
+                   paste0(gettext("Center = "), if(length(center) == 1) 
                      signif(center[1], digits) else "variable"),
-                   paste0("StdDev = ", if(length(std.dev) == 1) 
+                   paste0(gettext("StdDev = "), if(length(std.dev) == 1) 
                      signif(std.dev[1], digits) else "variable"), sep = "\n")
     
-    text2 <- paste(paste0("Smoothing parameter = ", 
+    text2 <- paste(paste0(gettext("Smoothing parameter = "), 
                           signif(object$lambda, digits = digits)),
-                   paste0("Control limits at ", object$nsigmas, "xStdErr"),
-                   paste0("Number beyond limits = ", 
+                   paste0(gettext("Control limits at "), object$nsigmas, "xStdErr"),
+                   paste0(gettext("Number beyond limits = "), 
                           sum(violations, na.rm = TRUE)), sep = "\n")
     tab1 <- tab_base + 
       geom_text(aes(x = -Inf, y = Inf), label = text1, 
